@@ -1,0 +1,51 @@
+services:
+  # TCP Server - generates challenges and verifies PoW
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: wow-server
+    ports:
+      - "8080:8080"
+    environment:
+      - WOW_ADDR=:8080
+      - WOW_BITS=20        # Difficulty (20 bits = ~1-5 sec)
+      - WOW_EXPIRES=60     # Challenge TTL in seconds
+    networks:
+      - wow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep 8080 > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Client - solves PoW and gets quotes
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client.alpine  # Use alpine for shell support
+    container_name: wow-client
+    environment:
+      - WOW_ADDR=server:8080
+    networks:
+      - wow-network
+    depends_on:
+      server:
+        condition: service_started
+    # Wait for server to be ready (3 seconds), then run client
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        echo "Waiting for server to start..."
+        sleep 3
+        echo "Connecting to server..."
+        /client
+    restart: "no"  # Run once and exit
+
+networks:
+  wow-network:
+    driver: bridge
+

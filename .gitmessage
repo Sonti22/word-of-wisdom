@@ -1,0 +1,21 @@
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+#
+# Type: feat, fix, docs, style, refactor, test, chore
+# Scope: pow, server, client, docker, ratelimit, quotes
+# Subject: imperative mood, no period at end, max 50 chars
+# Body: why the change, not how (wrap at 72 chars)
+# Footer: references to issues, breaking changes
+#
+# Examples:
+#   feat(pow): verify() with leading-zero-bits check
+#   feat(server): TCP handler with deadlines and JSON protocol
+#   feat(client): parallel nonce search + solution submit
+#   feat(ratelimit): IP-based token bucket + adaptive difficulty
+#   chore(docker): server & client Dockerfiles + compose
+#   docs: README with PoW rationale and anti-DDoS measures
+#   test(pow): unit tests for challenge expiration and verification
+

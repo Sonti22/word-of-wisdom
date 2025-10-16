@@ -1,0 +1,35 @@
+# Build stage
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /build
+
+# Copy go mod files
+COPY go.mod go.sum* ./
+
+# Download dependencies (if go.sum exists)
+RUN go mod download || true
+
+# Copy source code
+COPY . .
+
+# Build the client binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-w -s" \
+    -o /build/client \
+    ./cmd/client
+
+# Final stage: alpine for shell support (docker-compose delay)
+FROM alpine:latest
+
+# Install ca-certificates for HTTPS (if needed)
+RUN apk --no-cache add ca-certificates
+
+# Copy the binary from builder
+COPY --from=builder /build/client /client
+
+# Set default environment variables
+ENV WOW_ADDR="server:8080"
+
+# Run the client
+ENTRYPOINT ["/client"]
+
